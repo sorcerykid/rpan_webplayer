@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html>
+<!--
+  RPAN Media Player v1.5
+  Copyright(c) 2022, Leslie E. Krause
+
+  Licensed under The MIT License.
+  https://opensource.org/licenses/MIT
+-->
+
+<head>
+<title>RPAN Media Player</title>
+
+<!-- // http://www.pixeden.com/icon-fonts/stroke-7-icon-font-set -->
+<style>
+@font-face {
+	font-family: 'Pe-icon-7-stroke';
+	src:url('fonts/Pe-icon-7-stroke.eot?d7yf1v');
+	src:url('fonts/Pe-icon-7-stroke.eot?#iefixd7yf1v') format('embedded-opentype'),
+		url('fonts/Pe-icon-7-stroke.woff?d7yf1v') format('woff'),
+		url('fonts/Pe-icon-7-stroke.ttf?d7yf1v') format('truetype');
+	font-weight: normal;
+	font-style: normal;
+}
+
+@font-face {
+	font-family: 'Open-Sans';
+	src:url('fonts/Open-Sans.ttf.woff') format('woff'),
+		url('fonts/Open-Sans.ttf.eot'),
+		url('fonts/Open-Sans.ttf.eot?#iefix') format('embedded-opentype'); 
+	font-weight: normal;
+	font-style: normal;
+}
+
+@font-face {
+    font-family: 'Plata-Sans-Black';
+    src:url('fonts/Plata-Sans-Black.ttf.woff') format('woff'),
+        url('fonts/Plata-Sans-Black.ttf.svg#Plata-Sans-Black') format('svg'),
+        url('fonts/Plata-Sans-Black.ttf.eot'),
+        url('fonts/Plata-Sans-Black.ttf.eot?#iefix') format('embedded-opentype'); 
+    font-weight: normal;
+    font-style: normal;
+}
+
+BODY {
+	margin: 0px;
+	overflow: hidden;  /** disable window scrollbars */
+	background-color: #222222;
+}
+
+DIV {
+	box-sizing: border-box;  /** enforce saner layouts */
+}
+
+#welcome {
+	height: 100vh;
+	width: 100vw;
+}
+
+#welcome H3 {
+	font-family: plata-sans-black;
+	font-size: 26px;
+	color: #ffffff;
+}
+
+#welcome P {
+	font-family: open-sans;
+	font-size: 14px;
+	color: #ffffff;
+}
+
+#content {
+	left: 0px;
+	top: 0px;
+	height: 100vh;
+	width: 100vw;
+	display: none;
+	position: absolute;  /* needed to overlay video element */
+}
+
+#player {
+	width: 56vh;
+	min-width: 56vh;
+	height: 100vh;
+	background-color: rgba(0,0,0,0.0);
+	transition: 0.5s all;
+}
+
+#viewer {
+	width: 100%;
+	height: 100vh;
+}
+
+#viewer H2 {
+	font-family: plata-sans-black;
+	font-size: 16px;
+	color: #afafaf;
+	background-color: #484848;
+	height: 22px;
+	padding-top: 3px;
+	margin-top: 0px;
+	margin-bottom: 0px;
+}
+
+#viewer ARTICLE {
+	font-family: open-sans;
+	font-size: 14px;
+	color: #ffffff;
+	padding: 12px;
+	left: 0px;
+	right: 0px;
+	bottom: 0px;
+	top: 25px;
+	overflow-y: scroll;
+	position: absolute;
+}
+
+#viewer IMG {
+	border-radius: 8px;
+	margin-left: -54px;
+}
+
+#viewer SMALL {
+	font-size: 13px;
+}
+
+#viewer BIG {
+	font-size: 15px;
+}
+
+#viewer STRONG {
+	font-size: 12px;
+	background-color: #bb6600;
+	border-radius: 3px;
+	padding-left: 5px;
+	padding-right: 5px;
+	display: inline-block;  /** preserve background below baseline */
+}
+
+#viewer TH {
+	font-size: 16px;
+	color: #242424;
+	background-color: #808080;
+}
+
+#viewer DL {
+	line-height: 20px;
+	margin-top: 0px;
+	margin-bottom: 0px;
+}
+
+#viewer DT {
+	margin-left: 56px;
+	margin-top: 0px;
+}
+
+#viewer DD {
+	margin-left: 56px;
+	margin-top: 0px;
+	margin-bottom: 10px;
+}
+
+#viewer LI {
+	margin-left: 24px;
+	margin-top: 0px;
+	margin-bottom: 0px;
+}
+
+#chat_panel, #info_panel {
+	height: 100%;
+	position: relative;  /* needed for full-height scrollbars */
+}
+
+#video_controls {
+	margin-bottom: 10px;
+	border-radius: 42px;
+	color: #aaaaaa;
+	opacity: 0.0;
+	cursor: pointer;
+	background-color: rgba(0,0,0,0.6);
+	transition: 0.5s all;
+}
+
+#audio_settings {
+	margin-bottom: 60px;
+	border-radius: 28px;
+	color: #aaaaaa;
+	opacity: 0.0;
+	cursor: pointer;
+	background-color: rgba(0,0,0,0.6);
+	transition: 0.5s all;
+}
+
+#progress {
+	margin-bottom: 10px;
+	border-radius: 15px;
+	color: #aaaaaa;
+	opacity: 0.4;
+	cursor: pointer;
+	background-color: rgba(0,0,0,0.6);
+	transition: 0.5s all;
+}
+
+#overview {
+	margin-bottom: 45px;
+	color: #ffffff;
+	opacity: 0.0;
+	transition: 0.5s all;
+}
+
+#player:hover {
+	background-color: rgba(0,0,0,0.3);
+}
+
+#player:hover #overview, #player:hover #progress, #player:hover #video_controls, #player:hover #audio_settings {
+	opacity: 1.0;
+}
+
+#progress A:hover, #video_controls A:hover, #audio_settings A:hover {
+	color: #ffffff;
+}
+
+#c_prev, #c_next, #c_exit, #c_info {
+	font-family: pe-icon-7-stroke;
+	font-weight: bold;
+	font-size: 26px;
+	padding-top: 5px;
+	display: inline-block;  /* hack to allow top padding */
+}
+
+#c_play {
+	font-family: pe-icon-7-stroke;
+	font-weight: bold;
+	font-size: 36px;
+	padding-top: 5px;
+	display: inline-block;  /* hack to allow top padding */
+}
+
+#s_mute {
+	font-family: pe-icon-7-stroke;
+	font-weight: bold;
+	font-size: 20px;
+	padding-top: 3px;
+	display: inline-block;  /* hack to allow top padding */
+}
+
+#p_timer1, #p_timer2, #s_state {
+	font-family: open-sans;
+	font-size: 14px;
+	font-weight: bold;
+}
+
+#p_gauge2, #s_gauge2 {
+	width: 6px;
+	min-width: 6px;
+	height: 8px;
+	border-radius: 3px;
+	background-color: #aaaaaa;
+}
+
+#p_gauge1, #s_gauge1 {
+	width: 100%;
+	height: 8px;
+	border-radius: 3px;
+	background-color: #666666;
+}
+
+#o_show_state {
+	width: 110px;
+	padding: 2px;
+	border-radius: 6px;
+	background-color: #bb6600;
+	font-family: open-sans;
+	font-size: 12px;
+	font-weight: bold;
+	text-align: center;
+}
+
+#o_show_title {
+	margin-top: 4px;
+	font-family: plata-sans-black;
+	font-size: 24px;
+	line-height: 26px;
+	letter-spacing: -0.02em;
+}
+
+#o_subreddit {
+	margin-top: 2px;
+	font-family: open-sans;
+	font-size: 12px;
+}
+
+#video {
+	display: none;
+	height: 100vh;
+}
+</style>
+<script src="lib/format.js"></script>
+<script src="lib/videoplayer.js"></script>
+<script src="lib/chatreplay.js"></script>
+<script src="lib/showreport.js"></script>
+
+<script>
+var app = { name: "RPAN Media Player", version: "1.5" };
+
+app.onClickExit = function ( )
+{
+	location.reload( );
+}
+
+app.onClickInfo = function ( )
+{
+	if( chat_panel_elem.style.display == 'block' ) {
+		chat_panel_elem.style.display = 'none';
+		info_panel_elem.style.display = 'block';
+	}
+	else {
+		chat_panel_elem.style.display = 'block';
+		info_panel_elem.style.display = 'none';
+	}
+}
+
+app.onSelectFile = function ( json_file )
+{
+	let mp4_filespec = json_file.name.replace( /\.json$/, '.mp4' );
+	
+	if( json_file.name.indexOf( '.json' ) == -1 ) {
+		alert( 'Only JSON files are supported.' );
+		return;
+	}
+	
+	video_player.load( mp4_filespec );
+	chat_replay.load( json_file );
+	welcome_elem.style.display = 'none';
+	content_elem.style.display = 'block';
+	chat_panel_elem.style.display = 'block';
+	info_panel_elem.style.display = 'none';
+}
+
+app.onDropFile = function ( e )
+{
+	e.preventDefault( );
+	app.onSelectFile( e.dataTransfer.files[ 0 ] );
+}
+
+window.ondragover = function ( e )
+{
+	event.preventDefault( );
+}
+</script>
+</head>
+
+<body link="#DDAA44" vlink="#DDAA44" alink="white">
+
+<table id="welcome" cellpadding="0" cellspacing="0">
+<tr><td align="center" valign="middle" onDrop="app.onDropFile( event );" donDragOver="event.preventDefault( );">
+	<div style="font-family: pe-icon-7-stroke; font-weight: bold; font-size: 128px; color: #ddaa44;">&#xe6a5;</div>
+	<h3>RPAN Media Player</h3>
+	<p>Version 1.5</p>
+	<p><b>Select a chat archive to open:</b></p>
+	<p><input type="file" id="file-selector" onChange="app.onSelectFile( event.target.files[ 0 ] );"></p>
+</td></tr>
+</table>
+
+<video id="video" type="video/mp4"></video>
+
+<table id="content" cellpadding="0" cellspacing="0">
+<tr><td id="player" align="center" valign="bottom"><div style="padding: 12px; padding-bottom: 6px;">
+
+	<table id="video_controls" width="80%" cellpadding="0" cellspacing="8">
+	<tr align="center" valign="middle">
+		<td><a id="c_exit" title="Exit media player" onClick="app.onClickExit( );">&nbsp;&#xe681;</a></td>
+		<td><a id="c_prev" title="Skip backward 10 seconds" onClick="video_player.scan( -10 );">&#xe620;</a></td>
+		<td><a id="c_play" title="Pause or resume playback" onClick="video_player.play( );">&#xe624;</a></td>
+		<td><a id="c_next" title="Skip forward 10 seconds" onClick="video_player.scan( 10 );">&#xe62d;</a></td>
+		<td><a id="c_info" title="View show report" onClick="app.onClickInfo( );">&#xe647;&nbsp;</a></td>
+	</tr>
+	</table>
+	
+	<table id="audio_settings" width="70%" cellpadding="0" cellspacing="4">
+	<tr align="center" valign="middle">
+		<td width="40" title="Mute or unmute"><a id="s_mute" onClick="video_player.audio.mute( );">&#xe692;</a></td>
+		<td align="left" title="Adjust volume"><div id="s_gauge1" onClick="video_player.audio.fade( event );"><div id="s_gauge2"></div></div></td>
+		<td width="45" title="Volume setting"><a id="s_state">100</a></td>
+	</tr>
+	</table>
+
+	<table id="overview" width="100%" cellpadding="0" cellpadding="4">
+	<tr>
+		<td width="80">
+		<div id="o_show_state">RECORDED LIVE</div>
+		<div id="o_show_title"></div>
+		<div id="o_subreddit"></div>
+		</td>
+	</tr>
+	</table>
+
+	<table id="progress" width="100%" cellpadding="0" cellspacing="4">
+	<tr align="center">
+		<td width="70" id="p_timer1">0:00:00</td>
+		<td align="left"><div id="p_gauge1" onClick="video_player.jump( event );"><div id="p_gauge2"></div></div></td>
+		<td width="70" id="p_timer2">0:00:00</td>
+	</tr>
+	</table>
+</div></td>
+<td id="viewer" align="left" valign="top">
+	<div id="info_panel">
+		<h2 align="center">SHOW REPORT</h2>
+		<article id="info_block"></article>
+	</div>
+	<div id="chat_panel">
+		<h2 align="center">CHAT REPLAY</h2>
+		<article id="chat_block"></article>
+	</div>
+</td></tr>
+</table>
+
+<script>
+var video_player = new VideoPlayer( 'video', 'c_play', 's_gauge2', 's_mute', 's_state', 'p_gauge2', 'p_timer1', 'p_timer2' );
+var chat_replay = new ChatReplay( video_player, 'chat_block', 'o_show_title', 'o_subreddit' );
+var show_report = new ShowReport( chat_replay, 'info_block' );
+var welcome_elem = document.getElementById( 'welcome' );
+var content_elem = document.getElementById( 'content' );
+var info_panel_elem = document.getElementById( 'info_panel' );
+var chat_panel_elem = document.getElementById( 'chat_panel' );
+</script>
+
+</body>
+</html>

@@ -1,0 +1,11 @@
+'Open Sans' designed by Steve Matteson
+Copyright (c) 2010-2011, Google Corporation.
+Licensed under the Apache License 2.0
+
+'Plata Sans Black' designed by Pablo Impallari, Andres Torresi, & Cristiano Sobral
+Copyright (c) 2012, Impallari Type
+Licensed under the SIL Open Font License 1.1
+
+'Stroke 7 Icon' designed by PixEden
+Copyright (c) 2014, PixEden, LLC.
+Licensed under the PixEden License (royalty free)
